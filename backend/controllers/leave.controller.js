@@ -1,4 +1,5 @@
 import Leave from "../models/leave.model.js";
+import { sendNotification } from "../utils/sendNotification.js";
 
 export const applyLeave = async (req, res) => {
   try {
@@ -47,11 +48,18 @@ export const updateLeaveStatus = async (req, res) => {
     const { status, wardenComment } = req.body;
 
     const leave = await Leave.findById(req.params.id);
-    if (!leave) return res.status(404).json({ message: "Leave request not found" });
+    if (!leave)
+      return res.status(404).json({ message: "Leave request not found" });
 
     leave.status = status;
     leave.wardenComment = wardenComment || "";
     await leave.save();
+
+    // notify student
+    const title = "Leave Status Updated";
+    const message = `Your leave request has been ${status}.`;
+
+    await sendNotification(leave.user, title, message);
 
     return res.json({
       message: "Leave status updated successfully",
@@ -61,3 +69,4 @@ export const updateLeaveStatus = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+

@@ -2,6 +2,9 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./config/db.js";
+import notificationRoutes from "./routes/notification.route.js";
+
+
 
 dotenv.config();
 connectDB();
@@ -19,6 +22,7 @@ import wardenRoutes from "./routes/warden.routes.js";
 app.use("/api/auth", authRoutes);
 app.use("/api/complaints", complaintRoutes);
 app.use("/api/leave", leaveRoutes);
+app.use("/api/notifications", notificationRoutes);
 app.use("/api/warden", wardenRoutes);
 
 app.get("/", (req, res) => {

@@ -1,4 +1,6 @@
 import Complaint from "../models/complaint.model.js";
+import { sendNotification } from "../utils/sendNotification.js";
+
 
 export const createComplaint = async (req, res) => {
   try {
@@ -47,18 +49,24 @@ export const updateComplaintStatus = async (req, res) => {
     const { status } = req.body;
 
     const complaint = await Complaint.findById(req.params.id);
-
     if (!complaint)
       return res.status(404).json({ message: "Complaint not found" });
 
     complaint.status = status;
     await complaint.save();
 
+    // notify student
+    const title = "Complaint Status Updated";
+    const message = `Your complaint (${complaint.category}) is now ${status}.`;
+
+    await sendNotification(complaint.user, title, message);
+
     return res.json({
       message: "Status updated successfully",
-      complaint,
+      complaint
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
 };
+
