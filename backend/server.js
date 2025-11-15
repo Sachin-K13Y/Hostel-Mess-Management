@@ -6,6 +6,8 @@ import notificationRoutes from "./routes/notification.route.js";
 
 
 
+
+
 dotenv.config();
 connectDB();
 
