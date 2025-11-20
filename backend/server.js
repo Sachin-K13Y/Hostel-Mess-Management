@@ -3,8 +3,8 @@ import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./config/db.js";
 import notificationRoutes from "./routes/notification.route.js";
-
-
+import fakeIotRoutes from "./routes/fakeIot.routes.js";
+import fakeMlRoutes from "./routes/fakeMl.routes.js";
 
 
 
@@ -26,6 +26,8 @@ app.use("/api/complaints", complaintRoutes);
 app.use("/api/leave", leaveRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/warden", wardenRoutes);
+app.use("/api/iot", fakeIotRoutes);
+app.use("/api/mess", fakeMlRoutes);
 
 app.get("/", (req, res) => {
     res.json({ message: "Hello world" });

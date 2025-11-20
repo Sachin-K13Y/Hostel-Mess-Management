@@ -14,6 +14,8 @@ import WardenDashboard from "./pages/WardenDashboard";
 import WardenComplaints from "./pages/WardenComplaints";
 import WardenLeaves from "./pages/WardenLeaves";
 import WardenBroadcast from "./pages/WardenBroadcast";
+import IotHeadcount from "./pages/IotHeadcount";
+import MessPrediction from "./pages/MessPrediction"; // ⭐ NEW ML PAGE
 
 import Navbar from "./components/Navbar";
 import WardenNavbar from "./components/WardenNavbar";
@@ -24,22 +26,24 @@ import RoleRoute from "./components/RoleRoute";
 function App() {
   const { user } = useSelector((state) => state.auth);
 
-  const hideNavbar = window.location.pathname === "/" ||
-                     window.location.pathname === "/register";
+  // Hide navbar on login/register pages
+  const hideNavbar =
+    window.location.pathname === "/" ||
+    window.location.pathname === "/register";
 
   return (
     <BrowserRouter>
-
-      {/* Auto-switch navbar (except login/register) */}
+      
+      {/* Navbar: Student / Warden Switch */}
       {!hideNavbar && (
         user?.role === "warden" ? <WardenNavbar /> : <Navbar />
       )}
 
       <Routes>
+
         {/* PUBLIC ROUTES */}
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
-
 
         {/* ------------------------------------------
             STUDENT ROUTES
@@ -97,7 +101,6 @@ function App() {
           }
         />
 
-
         {/* ------------------------------------------
             WARDEN ROUTES
         ------------------------------------------- */}
@@ -144,8 +147,32 @@ function App() {
             </ProtectedRoute>
           }
         />
-      </Routes>
 
+        {/* IoT HEADCOUNT */}
+        <Route
+          path="/warden/iot-headcount"
+          element={
+            <ProtectedRoute>
+              <RoleRoute role="warden">
+                <IotHeadcount />
+              </RoleRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ⭐ ML PREDICTION PAGE */}
+        <Route
+          path="/warden/ml-prediction"
+          element={
+            <ProtectedRoute>
+              <RoleRoute role="warden">
+                <MessPrediction />
+              </RoleRoute>
+            </ProtectedRoute>
+          }
+        />
+
+      </Routes>
     </BrowserRouter>
   );
 }

@@ -1,3 +1,29 @@
+Frontend (React + Vite)
+
+Overview
+This folder contains the React frontend built with Vite. It uses Redux Toolkit for state management and React Router for navigation.
+
+Quick setup
+1. Install dependencies
+   - npm install
+
+2. Run development server
+   - npm run dev
+
+Build
+ - npm run build
+ - npm run preview (serve the production build locally)
+
+Important files
+- `src/main.jsx` — app bootstrapping
+- `src/App.jsx` — routes and top-level components
+- `src/api/` — Axios instances and API wrappers
+- `src/features/` — Redux slices
+- `src/pages/` — page components
+
+Notes
+- Vite requires Node.js v16+. Tailwind and other tooling are configured in package.json.
+- Update `src/api/axios.js` base URL if backend runs on a non-default host/port.
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
