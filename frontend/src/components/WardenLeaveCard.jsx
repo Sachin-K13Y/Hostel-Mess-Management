@@ -1,105 +1,149 @@
 import { useState } from "react";
 
-// Helper: Status Badge (re-used from other components)
+// --- UI HELPER: Status Badge ---
 const StatusBadge = ({ status }) => {
-  const baseClasses = "px-3 py-1 rounded-full text-xs font-medium capitalize";
-  let statusClasses = "";
-
-  switch (status) {
-    case "Approved":
-      statusClasses = "bg-green-100 text-green-800";
-      break;
-    case "Rejected":
-      statusClasses = "bg-red-100 text-red-800";
-      break;
-    default: // Pending
-      statusClasses = "bg-yellow-100 text-yellow-800";
-  }
-
-  return <span className={`${baseClasses} ${statusClasses}`}>{status}</span>;
-};
-
-// Helper: Info Row
-const InfoRow = ({ label, value }) => (
-  <div className="flex justify-between text-sm">
-    <span className="text-gray-600">{label}:</span>
-    <span className="font-medium text-gray-900">{value}</span>
-  </div>
-);
-
-// --- The Card Component ---
-export default function WardenLeaveCard({ leave, onUpdateStatus, loading }) {
-  // This card manages its own comment state, pre-filled if it exists
-  const [comment, setComment] = useState(leave.wardenComment || "");
-
-  const handleApprove = () => {
-    onUpdateStatus(leave._id, "Approved", comment);
-  };
-
-  const handleReject = () => {
-    onUpdateStatus(leave._id, "Rejected", comment);
+  const getStyle = () => {
+    switch (status) {
+      case "Approved": return "bg-green-100 text-green-700 border-green-200";
+      case "Rejected": return "bg-red-100 text-red-700 border-red-200";
+      default: return "bg-yellow-100 text-yellow-700 border-yellow-200";
+    }
   };
 
   return (
-    <div className="flex flex-col rounded-xl bg-white p-5 shadow-md">
+    <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wide ${getStyle()}`}>
+      <span className={`h-2 w-2 rounded-full ${status === "Approved" ? "bg-green-500" : status === "Rejected" ? "bg-red-500" : "bg-yellow-500"}`}></span>
+      {status}
+    </span>
+  );
+};
+
+// --- COMPONENT ---
+export default function WardenLeaveCard({ leave, onUpdateStatus, loading }) {
+  const [comment, setComment] = useState(leave.wardenComment || "");
+  const [actionLoading, setActionLoading] = useState(null);
+
+  const handleAction = async (newStatus) => {
+    setActionLoading(newStatus);
+    await onUpdateStatus(leave._id, newStatus, comment);
+    setActionLoading(null);
+  };
+
+  // Date formatting helper
+  const formatDate = (dateStr) => {
+    const date = new Date(dateStr);
+    return {
+      day: date.getDate(),
+      month: date.toLocaleString('default', { month: 'short' }),
+      full: date.toLocaleDateString()
+    };
+  };
+
+  const from = formatDate(leave.fromDate);
+  const to = formatDate(leave.toDate);
+
+  return (
+    <div className="group relative flex flex-col justify-between rounded-xl bg-white p-5 shadow-sm border border-gray-100 transition-all duration-300 hover:shadow-md hover:border-blue-100">
       
-      {/* Card Header */}
-      <div className="flex justify-between items-start mb-3">
-        <h3 className="text-lg font-semibold text-gray-900">
-          {leave.user?.name}
-        </h3>
+      {/* --- HEADER --- */}
+      <div className="flex items-start justify-between mb-5">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 font-bold text-lg">
+            {leave.user?.name?.charAt(0) || "S"}
+          </div>
+          <div>
+            <h3 className="font-bold text-gray-800 leading-tight">{leave.user?.name}</h3>
+            <span className="text-xs text-gray-400">Applied: {new Date(leave.createdAt).toLocaleDateString()}</span>
+          </div>
+        </div>
         <StatusBadge status={leave.status} />
       </div>
 
-      {/* Leave Details */}
-      <div className="space-y-2 mb-4">
-        <InfoRow label="From" value={leave.fromDate.substring(0, 10)} />
-        <InfoRow label="To" value={leave.toDate.substring(0, 10)} />
-        <p className="text-sm text-gray-800 pt-2">
-          <span className="font-medium text-gray-900">Reason: </span>
-          {leave.reason}
-        </p>
-        <span className="text-xs text-gray-500 float-right pt-1">
-          Applied: {new Date(leave.createdAt).toLocaleString()}
-        </span>
+      {/* --- BODY: TIMELINE --- */}
+      <div className="mb-4 rounded-lg bg-gray-50 p-3 border border-gray-100">
+        <div className="flex items-center justify-between text-center">
+          
+          {/* FROM */}
+          <div className="flex flex-col items-center">
+            <span className="text-xs font-bold uppercase text-gray-400">From</span>
+            <span className="text-lg font-bold text-gray-800">{from.day}</span>
+            <span className="text-xs font-medium text-gray-500">{from.month}</span>
+          </div>
+
+          {/* ARROW */}
+          <div className="flex-1 px-4 flex flex-col items-center">
+             <span className="text-xs text-gray-400 mb-1">Duration</span>
+             <div className="h-px w-full bg-gray-300 relative">
+               <div className="absolute right-0 -top-1 w-2 h-2 border-t-2 border-r-2 border-gray-300 rotate-45"></div>
+             </div>
+          </div>
+
+          {/* TO */}
+          <div className="flex flex-col items-center">
+            <span className="text-xs font-bold uppercase text-gray-400">To</span>
+            <span className="text-lg font-bold text-gray-800">{to.day}</span>
+            <span className="text-xs font-medium text-gray-500">{to.month}</span>
+          </div>
+        </div>
       </div>
 
-      {/* Spacer to push controls to the bottom */}
-      <div className="flex-grow" />
+      {/* REASON */}
+      <div className="mb-6">
+        <p className="text-xs font-bold uppercase text-gray-400 mb-1">Reason</p>
+        <p className="text-sm text-gray-700 leading-relaxed italic">
+          "{leave.reason}"
+        </p>
+      </div>
 
-      {/* Warden Controls */}
-      <div className="mt-4 border-t border-gray-100 pt-4">
-        <label htmlFor={`comment-${leave._id}`} className="block text-sm font-medium text-gray-700 mb-1">
-          Warden Comment
-        </label>
-        <textarea
-          id={`comment-${leave._id}`}
-          placeholder="Add a comment (optional)"
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          rows={2}
-          className="block w-full px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-          disabled={loading}
-        />
+      {/* --- FOOTER: ACTIONS --- */}
+      <div className="mt-auto pt-4 border-t border-gray-100">
         
+        {/* Comment Input */}
+        <div className="mb-4">
+          <label htmlFor={`comment-${leave._id}`} className="block text-xs font-bold text-gray-500 mb-1">
+            Warden Comment (Optional)
+          </label>
+          <input
+            id={`comment-${leave._id}`}
+            type="text"
+            placeholder="Add note..."
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            disabled={loading || leave.status !== "Pending"}
+            className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-50"
+          />
+        </div>
+
         {/* Action Buttons */}
-        <div className="flex gap-3 mt-3">
-          {leave.status !== "Approved" && (
-            <button
-              className="w-full rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-green-700 disabled:bg-gray-400"
-              onClick={handleApprove}
-              disabled={loading}
-            >
-              Approve
-            </button>
-          )}
+        <div className="flex gap-3">
+          
+          {/* Reject Button */}
           {leave.status !== "Rejected" && (
             <button
-              className="w-full rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-red-700 disabled:bg-gray-400"
-              onClick={handleReject}
+              onClick={() => handleAction("Rejected")}
               disabled={loading}
+              className="flex-1 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm font-bold text-red-600 transition-colors hover:bg-red-100 hover:border-red-200 disabled:opacity-50 flex justify-center items-center gap-2"
             >
-              Reject
+              {loading && actionLoading === "Rejected" ? (
+                <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+              ) : (
+                "Reject"
+              )}
+            </button>
+          )}
+
+          {/* Approve Button */}
+          {leave.status !== "Approved" && (
+            <button
+              onClick={() => handleAction("Approved")}
+              disabled={loading}
+              className="flex-1 rounded-lg bg-green-600 px-3 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-green-700 hover:shadow-md disabled:bg-green-300 flex justify-center items-center gap-2"
+            >
+               {loading && actionLoading === "Approved" ? (
+                <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+              ) : (
+                "Approve"
+              )}
             </button>
           )}
         </div>

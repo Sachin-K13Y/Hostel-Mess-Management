@@ -23,85 +23,82 @@ export default function Navbar() {
     navigate("/");
   };
 
-  // --- Tailwind Class Helpers ---
-
-  // Base classes for the navigation links in the center
-  const navLinkBase =
-    "flex items-center gap-2 text-gray-600 text-sm font-medium py-2 px-3 rounded-lg transition-colors duration-200";
-  // Classes to add when the link is hovered
-  const navLinkHover = "hover:text-gray-900 hover:bg-gray-100";
-  // Classes to add when the link is active
-  const navLinkActive = "bg-blue-50 text-blue-600 font-semibold";
-
-  // Function to dynamically set NavLink classes
+  // --- Style Helper for Nav Links ---
   const getNavLinkClass = ({ isActive }) =>
-    isActive
-      ? `${navLinkBase} ${navLinkActive}`
-      : `${navLinkBase} ${navLinkHover}`;
-
-  // Base classes for the icon buttons on the right
-  const iconButtonBase =
-    "flex items-center justify-center w-10 h-10 rounded-full text-gray-600 transition-colors duration-200";
-  // Classes for icon button hover
-  const iconButtonHover = "hover:text-gray-900 hover:bg-gray-100";
-
-  // --- Component JSX ---
+    `flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium transition-all duration-200 ${
+      isActive
+        ? "bg-blue-100 text-blue-700 ring-1 ring-blue-200 shadow-sm" // Active State
+        : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"    // Inactive State
+    }`;
 
   return (
-    <nav className="sticky top-0 z-50 flex h-16 w-full items-center justify-between border-b border-gray-100 bg-white px-8 shadow-sm">
+    <nav className="sticky top-0 z-50 flex h-16 w-full items-center justify-between border-b border-gray-200 bg-white/90 px-4 backdrop-blur-md shadow-sm md:px-8">
       
       {/* LEFT — LOGO */}
       <div
-        className="cursor-pointer text-2xl font-bold text-gray-800"
+        className="flex cursor-pointer items-center gap-2"
         onClick={() => navigate("/student/dashboard")}
       >
-        HostelMS
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white font-bold shadow-md">
+          H
+        </div>
+        <span className="hidden text-xl font-bold tracking-tight text-slate-800 sm:block">
+          HostelMS
+        </span>
       </div>
 
       {/* CENTER — NAVIGATION LINKS */}
-      <div className="flex items-center gap-3">
+      {/* On mobile, we hide the text and just show icons to save space */}
+      <div className="flex items-center gap-1 md:gap-2">
         <NavLink to="/student/dashboard" className={getNavLinkClass}>
           <MdOutlineDashboard className="text-xl" />
-          <span>Dashboard</span>
+          <span className="hidden sm:inline">Dashboard</span>
         </NavLink>
 
         <NavLink to="/student/complaints" className={getNavLinkClass}>
           <MdOutlineMarkunreadMailbox className="text-xl" />
-          <span>Complaints</span>
+          <span className="hidden sm:inline">Complaints</span>
         </NavLink>
 
         <NavLink to="/student/leave" className={getNavLinkClass}>
           <MdOutlineEventNote className="text-xl" />
-          <span>Leaves</span>
+          <span className="hidden sm:inline">Leaves</span>
         </NavLink>
       </div>
 
       {/* RIGHT — USER & ACTIONS */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 md:gap-4">
+        
+        {/* Notifications */}
         <NavLink
           to="/student/notifications"
-          className={`${iconButtonBase} ${iconButtonHover} relative`}
+          className="relative flex h-10 w-10 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800"
           title="Notifications"
         >
           <IoMdNotificationsOutline className="text-2xl" />
           {unreadCount > 0 && (
-            <span className="absolute right-0 top-0 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-red-500 text-xs font-bold text-white">
+            <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white">
               {unreadCount}
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
             </span>
           )}
         </NavLink>
 
+        {/* Profile */}
         <NavLink
           to="/profile"
-          className={`${iconButtonBase} ${iconButtonHover}`}
+          className="flex h-10 w-10 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800"
           title="Profile"
         >
           <CgProfile className="text-2xl" />
         </NavLink>
 
+        {/* Logout */}
+        <div className="h-6 w-px bg-gray-300 mx-1 hidden md:block"></div>
+
         <button
           onClick={handleLogout}
-          className={`${iconButtonBase} text-red-600 hover:bg-red-50 hover:text-red-700`}
+          className="flex h-10 w-10 items-center justify-center rounded-full text-red-400 transition-colors hover:bg-red-50 hover:text-red-600"
           title="Logout"
         >
           <MdOutlineLogout className="text-2xl" />
